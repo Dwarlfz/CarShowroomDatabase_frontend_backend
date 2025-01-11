@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $result = $conn->query($sql);
             break;
         case 'select_orders':
-            $sql = "SELECT `order id`, `CAR_NAME`, `CAR_MODEL`, `CAR_COLOR`, `CAR_ID`, `amount`, `TAX`, `delivery fee`, `ORDER_DATE`, `delivery date`, `total amount`
+            $sql = "SELECT `orderid`, `car name`, `car model`, `car color`, `car id`, `amount`, `tax`, `deliver fee`, `order date`, `delivery date`, `total amount`
                     FROM `orders`";
             $result = $conn->query($sql);
             break;
@@ -69,13 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $sql = "SELECT CONCAT(`customer`.`Fname`, ' ', `customer`.`Lname`) AS name, `transactions`.`orderid`, `orders`.`total amount`
                     FROM `customer`
                     INNER JOIN `transactions` ON `customer`.`CUSTOMERID` = `transactions`.`customerid`
-                    INNER JOIN `orders` ON `transactions`.`orderid` = `orders`.`order id`";
+                    INNER JOIN `orders` ON `transactions`.`orderid` = `orders`.`orderid`";
             $result = $conn->query($sql);
             break;
         case 'cars_not_sold':
             $sql = "SELECT `carid`, `car name`, `car model`, `car color`, `price`
                     FROM `instock`
-                    WHERE `car model` NOT IN (SELECT DISTINCT `CAR_MODEL` FROM `orders`)";
+                    WHERE `car model` NOT IN (SELECT DISTINCT `car model` FROM `orders`)";
             $result = $conn->query($sql);
             break;
         case 'employee_remarks':
@@ -88,9 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $result = $conn->query($sql);
             break;
         case 'sales_above_avg':
-            $sql = "SELECT `CAR_MODEL`, SUM(`amount`) AS total_sales
+            $sql = "SELECT `car model`, SUM(`amount`) AS total_sales
                     FROM `orders`
-                    GROUP BY `CAR_MODEL`
+                    GROUP BY `car model`
                     HAVING total_sales > (SELECT AVG(`amount`) FROM `orders`)";
             $result = $conn->query($sql);
             break;
@@ -107,29 +107,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $result = false;
             break;
         case 'total_sales_per_car':
-            $sql = "SELECT `CAR_ID`, SUM(`total amount`) AS total_sales_per_car 
+            $sql = "SELECT `car id`, SUM(`total amount`) AS total_sales_per_car 
                     FROM `orders`
-                    GROUP BY `CAR_ID`";
+                    GROUP BY `car id`";
             $result = $conn->query($sql);
             break;
         case 'avg_sales':
             $sql = "SELECT CAST(AVG(total_sales_per_car) AS SIGNED) AS avg_sales
-                    FROM (SELECT `CAR_ID`, SUM(`amount`) AS total_sales_per_car 
+                    FROM (SELECT `car id`, SUM(`amount`) AS total_sales_per_car 
                           FROM `orders` 
-                          GROUP BY `CAR_ID`) AS subquery";
+                          GROUP BY `car id`) AS subquery";
             $result = $conn->query($sql);
             break;
         case 'car_sales_above_avg':
             $sql = "WITH total_sales AS (
-                        SELECT `CAR_ID`, SUM(`amount`) AS total_sales_per_car 
+                        SELECT `car id`, SUM(`amount`) AS total_sales_per_car 
                         FROM `orders`
-                        GROUP BY `CAR_ID`
+                        GROUP BY `car id`
                     ), 
                     avg_sales AS (
                         SELECT AVG(total_sales_per_car) AS avg_sales_for_all_cars 
                         FROM total_sales
                     ) 
-                    SELECT `CAR_ID`, total_sales_per_car 
+                    SELECT `car id`, total_sales_per_car 
                     FROM total_sales ts 
                     JOIN avg_sales av ON ts.total_sales_per_car > av.avg_sales_for_all_cars";
             $result = $conn->query($sql);
